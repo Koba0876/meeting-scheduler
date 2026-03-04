@@ -36,7 +36,7 @@ export default function Home() {
   const [meetLink, setMeetLink] = useState('');
   const [eventLink, setEventLink] = useState('');
 
-  const fetchAvailability = useCallback(async (date: Date) => {
+  const fetchAvailability = useCallback(async (date: Date, tz: string) => {
     setIsLoadingSlots(true);
     setAvailableSlots([]);
     setSelectedSlot(null);
@@ -44,7 +44,7 @@ export default function Home() {
 
     try {
       const dateString = format(date, 'yyyy-MM-dd');
-      const response = await fetch(`/api/availability?date=${dateString}`);
+      const response = await fetch(`/api/availability?date=${dateString}&tz=${encodeURIComponent(tz)}`);
       const data = await response.json();
 
       if (response.ok) {
@@ -62,10 +62,10 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    if (selectedDate) {
-      fetchAvailability(selectedDate);
+    if (selectedDate && clientTimezone) {
+      fetchAvailability(selectedDate, clientTimezone);
     }
-  }, [selectedDate, fetchAvailability]);
+  }, [selectedDate, clientTimezone, fetchAvailability]);
 
   const handleSelectDate = (date: Date) => {
     setSelectedDate(date);
