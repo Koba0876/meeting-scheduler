@@ -2,8 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { AvailabilityPreferences, TimeBlock } from '@/lib/preferences';
-import { Loader2, Save, LogOut } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { Loader2, Save } from 'lucide-react';
 
 const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
@@ -12,7 +11,6 @@ export default function AdminPreferences() {
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
     const [message, setMessage] = useState({ text: '', type: '' });
-    const router = useRouter();
 
     useEffect(() => {
         fetch('/api/preferences')
@@ -53,12 +51,7 @@ export default function AdminPreferences() {
         }
     };
 
-    const handleSignOut = async () => {
-        // Just delete the cookie by setting it to expire in the past
-        document.cookie = 'admin_auth=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-        router.push('/admin/login');
-        router.refresh();
-    };
+
 
     const updateDayWorking = (dayIndex: number, isWorking: boolean) => {
         if (!prefs) return;
@@ -180,13 +173,7 @@ export default function AdminPreferences() {
                             Configure your weekly working hours.
                         </p>
                     </div>
-                    <button
-                        onClick={handleSignOut}
-                        className="font-pixel uppercase text-[10px] flex items-center px-4 py-3 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-sm"
-                    >
-                        <LogOut className="w-4 h-4 mr-2" />
-                        Sign Out
-                    </button>
+
                 </div>
 
                 <div className="bg-white dark:bg-zinc-900 rounded-2xl shadow-sm border border-zinc-200 dark:border-zinc-800 overflow-hidden">
