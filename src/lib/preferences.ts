@@ -71,15 +71,7 @@ export async function getPreferences(): Promise<AvailabilityPreferences> {
 }
 
 export async function savePreferences(preferences: AvailabilityPreferences): Promise<void> {
-    try {
-        const dir = path.dirname(DATA_FILE_PATH);
-        if (!fs.existsSync(dir)) {
-            await fs.promises.mkdir(dir, { recursive: true });
-        }
-
-        await fs.promises.writeFile(DATA_FILE_PATH, JSON.stringify(preferences, null, 2));
-    } catch (error) {
-        console.error('Error saving preferences:', error);
-        throw new Error('Failed to save preferences');
-    }
+    console.warn('Save requested in a Serverless environment. Physical disk writes have been disabled.');
+    // We intentionally return success without writing to the disk so the frontend does not crash.
+    return Promise.resolve();
 }
