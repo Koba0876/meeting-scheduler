@@ -13,10 +13,10 @@ export function middleware(request: NextRequest) {
         }
     }
 
-    // 2. Protect Main Booking Page (e.g. / or subpages except /login)
+    // 2. Protect Main Booking Page (e.g. / or subpages except /meeting/login)
     // We want to skip static files, api routes, and admin stuff
     if (
-        !pathname.startsWith('/login') &&
+        !pathname.startsWith('/meeting/login') &&
         !pathname.startsWith('/admin') &&
         !pathname.startsWith('/api') &&
         !pathname.startsWith('/_next') &&
@@ -24,7 +24,7 @@ export function middleware(request: NextRequest) {
     ) {
         const bookingAuth = request.cookies.get('booking_auth');
         if (!bookingAuth || bookingAuth.value !== 'authenticated') {
-            return NextResponse.redirect(new URL('/login', request.url));
+            return NextResponse.redirect(new URL('/meeting/login', request.url));
         }
     }
 
