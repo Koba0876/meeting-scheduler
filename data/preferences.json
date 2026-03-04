@@ -1,5 +1,5 @@
 {
-  "timezone": "Asia/Bangkok",
+  "timezone": "UTC",
   "schedule": {
     "0": {
       "isWorking": true,

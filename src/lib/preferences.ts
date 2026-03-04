@@ -27,13 +27,13 @@ export interface AvailabilityPreferences {
 const DEFAULT_PREFERENCES: AvailabilityPreferences = {
     timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
     schedule: {
-        0: { isWorking: false, timeBlocks: [{ start: '09:00', end: '17:00' }] }, // Sunday
-        1: { isWorking: true, timeBlocks: [{ start: '09:00', end: '17:00' }] },  // Monday
-        2: { isWorking: true, timeBlocks: [{ start: '09:00', end: '17:00' }] },  // Tuesday
-        3: { isWorking: true, timeBlocks: [{ start: '09:00', end: '17:00' }] },  // Wednesday
-        4: { isWorking: true, timeBlocks: [{ start: '09:00', end: '17:00' }] },  // Thursday
-        5: { isWorking: true, timeBlocks: [{ start: '09:00', end: '17:00' }] },  // Friday
-        6: { isWorking: false, timeBlocks: [{ start: '09:00', end: '17:00' }] }, // Saturday
+        0: { isWorking: true, timeBlocks: [{ start: '00:00', end: '01:00' }, { start: '08:00', end: '23:59' }] }, // Sunday
+        1: { isWorking: true, timeBlocks: [{ start: '00:00', end: '01:00' }, { start: '08:00', end: '23:59' }] }, // Monday
+        2: { isWorking: true, timeBlocks: [{ start: '00:00', end: '01:00' }, { start: '08:00', end: '23:59' }] }, // Tuesday
+        3: { isWorking: true, timeBlocks: [{ start: '00:00', end: '01:00' }, { start: '08:00', end: '23:59' }] }, // Wednesday
+        4: { isWorking: true, timeBlocks: [{ start: '00:00', end: '01:00' }, { start: '08:00', end: '23:59' }] }, // Thursday
+        5: { isWorking: true, timeBlocks: [{ start: '00:00', end: '01:00' }, { start: '08:00', end: '23:59' }] }, // Friday
+        6: { isWorking: true, timeBlocks: [{ start: '00:00', end: '01:00' }, { start: '08:00', end: '23:59' }] }, // Saturday
     }
 };
 
