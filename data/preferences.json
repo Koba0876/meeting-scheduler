@@ -1,5 +1,5 @@
 {
-  "timezone": "UTC",
+  "timezone": "Europe/Rome",
   "schedule": {
     "0": {
       "isWorking": true,

@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 import { getGoogleCalendarClient } from '@/lib/google';
 import { getPreferences } from '@/lib/preferences';
-import { addMinutes, isBefore, isAfter, formatISO, startOfDay, endOfDay, setHours, setMinutes } from 'date-fns';
+import { addMinutes, isBefore, isAfter, formatISO } from 'date-fns';
+import { fromZonedTime, toZonedTime } from 'date-fns-tz';
 
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
@@ -20,19 +21,22 @@ export async function GET(request: Request) {
         }
 
         const prefs = await getPreferences();
-        const selectedDate = new Date(dateParam);
 
-        // Get day of week (0-6)
-        const dayOfWeek = selectedDate.getDay() as 0 | 1 | 2 | 3 | 4 | 5 | 6;
+        // Find the day of week relative to the admin's intended timezone
+        const dateInAdminTz = toZonedTime(new Date(`${dateParam}T12:00:00Z`), prefs.timezone);
+        const dayOfWeek = dateInAdminTz.getDay() as 0 | 1 | 2 | 3 | 4 | 5 | 6;
         const dayPrefs = prefs.schedule[dayOfWeek];
 
         if (!dayPrefs.isWorking) {
             return NextResponse.json({ date: dateParam, availableSlots: [] });
         }
 
-        // Convert to ISO string for Google API for the whole day
-        const timeMin = formatISO(startOfDay(selectedDate));
-        const timeMax = formatISO(endOfDay(selectedDate));
+        // Convert literal start/end of the day in admin timezone to strict ISO boundaries for Google's API
+        const workStartOfDay = fromZonedTime(`${dateParam}T00:00:00`, prefs.timezone);
+        const workEndOfDay = fromZonedTime(`${dateParam}T23:59:59`, prefs.timezone);
+
+        const timeMin = formatISO(workStartOfDay);
+        const timeMax = formatISO(workEndOfDay);
 
         const response = await calendar.freebusy.query({
             requestBody: {
@@ -45,18 +49,22 @@ export async function GET(request: Request) {
 
         const busySlots = response.data.calendars?.[calendarId]?.busy || [];
 
-        // Generate 30-minute slots between workStart and workEnd for each block
+        // Generate 30-minute slots strictly in the Admin's timezone
         const availableSlots: string[] = [];
         const now = new Date();
 
         for (const block of dayPrefs.timeBlocks) {
-            // Parse start time (HH:mm)
-            const [startHour, startMin] = block.start.split(':').map(Number);
-            const workStart = setMinutes(setHours(selectedDate, startHour), startMin);
+            // "08:00" -> ISO strict UTC match for that exact hour in Rome
+            const blockStartStr = `${dateParam}T${block.start}:00`;
+            const workStart = fromZonedTime(blockStartStr, prefs.timezone);
 
-            // Parse end time (HH:mm)
-            const [endHour, endMin] = block.end.split(':').map(Number);
-            const workEnd = setMinutes(setHours(selectedDate, endHour), endMin);
+            const blockEndStr = `${dateParam}T${block.end}:00`;
+            let workEnd = fromZonedTime(blockEndStr, prefs.timezone);
+
+            // Allow 23:59 to capture the very end of the literal day
+            if (block.end === '23:59') {
+                workEnd = addMinutes(workEnd, 1);
+            }
 
             let currentSlotStart = workStart;
 
