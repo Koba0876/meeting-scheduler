@@ -56,7 +56,7 @@ export default function TimeSlots({
 
             <div className="max-h-[350px] overflow-y-auto pr-2 custom-scrollbar">
                 <div className="grid grid-cols-2 gap-3 pb-2">
-                    {slots.map((slot) => {
+                    {[...slots].sort((a, b) => new Date(a).getTime() - new Date(b).getTime()).map((slot) => {
                         const isSelected = selectedSlot === slot;
                         const timeString = formatInTimeZone(new Date(slot), clientTimezone || 'UTC', 'h:mm a');
 
