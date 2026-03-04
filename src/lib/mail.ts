@@ -1,7 +1,7 @@
 import nodemailer from 'nodemailer';
 
 const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST || 'smtps.aruba.it',
+    host: process.env.SMTP_HOST,
     port: Number(process.env.SMTP_PORT) || 465, // Aruba typically uses 465 for SSL or 587 for TLS
     secure: Number(process.env.SMTP_PORT) === 465, // true for 465, false for other ports
     auth: {
