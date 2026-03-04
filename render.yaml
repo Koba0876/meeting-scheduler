@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: meeting-scheduler
+    env: node
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: npm run start
+    envVars:
+      - key: NODE_VERSION
+        value: 20
+    disk:
+      name: data
+      mountPath: /opt/render/project/src/data
+      sizeGB: 1
