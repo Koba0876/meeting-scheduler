@@ -103,6 +103,8 @@ export default function Home() {
           </h1>
           <p className="font-mono text-zinc-500 dark:text-zinc-400 max-w-lg mx-auto">
             Set up your meeting with Bait Society. Choose a time that works for you. We will automatically generate a Google Meet link and send you an invitation.
+            <br /><br />
+            <strong>Flexible Scheduling:</strong> Once booked, you and your guests can reschedule or modify the meeting at any time. Simply open the event in your Google Calendar or click "Edit Event" in the confirmation email you receive to make changes.
           </p>
 
           {clientTimezone && (
