@@ -41,6 +41,7 @@ export async function POST(request: Request) {
                 dateTime: end.toISOString(),
             },
             attendees,
+            guestsCanModify: true,
             conferenceData: {
                 createRequest: {
                     requestId: `meet-${Date.now()}`,
