@@ -8,7 +8,7 @@ import { Loader2, Calendar, Clock, ArrowLeft } from 'lucide-react';
 interface BookingFormProps {
     selectedSlot: string;
     onBack: () => void;
-    onSuccess: (meetLink: string, eventLink: string) => void;
+    onSuccess: (meetLink: string, eventLink: string, status: 'confirmed' | 'pending') => void;
     clientTimezone: string;
 }
 
@@ -50,7 +50,7 @@ export default function BookingForm({ selectedSlot, onBack, onSuccess, clientTim
                 throw new Error(data.error || 'Failed to book meeting');
             }
 
-            onSuccess(data.meetLink, data.eventLink);
+            onSuccess(data.meetLink, data.eventLink, data.status);
         } catch (err) {
             setError(err instanceof Error ? err.message : 'An error occurred');
             setIsSubmitting(false);

@@ -81,9 +81,12 @@ export default function Home() {
     setSelectedSlot(null);
   };
 
-  const handleBookingSuccess = (meet: string, event: string) => {
+  const [bookingStatus, setBookingStatus] = useState<'confirmed' | 'pending'>('confirmed');
+
+  const handleBookingSuccess = (meet: string, event: string, status: 'confirmed' | 'pending') => {
     setMeetLink(meet);
     setEventLink(event);
+    setBookingStatus(status);
     setBookingStep('success');
   };
 
@@ -127,12 +130,20 @@ export default function Home() {
 
         {bookingStep === 'success' ? (
           <div className="max-w-md mx-auto bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xl rounded-3xl shadow-xl border border-zinc-200/50 dark:border-zinc-800/50 p-8 text-center animate-in zoom-in-95 duration-500">
-            <div className="w-16 h-16 bg-green-100 dark:bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
-              <CheckCircle className="w-8 h-8 text-green-600 dark:text-green-400" />
+            <div className={`w-16 h-16 ${bookingStatus === 'pending' ? 'bg-amber-100 dark:bg-amber-500/20' : 'bg-green-100 dark:bg-green-500/20'} rounded-full flex items-center justify-center mx-auto mb-6`}>
+              {bookingStatus === 'pending' ? (
+                <Clock className="w-8 h-8 text-amber-600 dark:text-amber-400" />
+              ) : (
+                <CheckCircle className="w-8 h-8 text-green-600 dark:text-green-400" />
+              )}
             </div>
-            <h2 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100 mb-2">Booking Confirmed!</h2>
+            <h2 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100 mb-2">
+              {bookingStatus === 'pending' ? 'Request Sent!' : 'Booking Confirmed!'}
+            </h2>
             <p className="text-zinc-500 dark:text-zinc-400 mb-8">
-              Your meeting has been scheduled and invitations have been sent to your email.
+              {bookingStatus === 'pending' 
+                ? "Since this is a last-minute booking, we've sent an authorization request to the Bait Society team. You'll receive a confirmation email once approved."
+                : "Your meeting has been scheduled and invitations have been sent to your email."}
             </p>
 
             <div className="bg-zinc-50 dark:bg-zinc-950 rounded-2xl p-4 mb-8 text-left border border-zinc-100 dark:border-zinc-800">
@@ -145,7 +156,7 @@ export default function Home() {
             </div>
 
             <div className="flex flex-col gap-3">
-              {meetLink && (
+              {meetLink && bookingStatus === 'confirmed' && (
                 <a
                   href={meetLink}
                   target="_blank"
@@ -155,7 +166,7 @@ export default function Home() {
                   Join Google Meet
                 </a>
               )}
-              {eventLink && (
+              {eventLink && bookingStatus === 'confirmed' && (
                 <a
                   href={eventLink}
                   target="_blank"

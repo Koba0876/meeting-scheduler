@@ -20,6 +20,9 @@ export async function POST(request: Request) {
 
         const start = new Date(startTime);
         const end = addMinutes(start, 30);
+        const now = new Date();
+        const fourHoursFromNow = new Date(now.getTime() + 4 * 60 * 60 * 1000);
+        const isPending = start < fourHoursFromNow;
 
         const attendees: { email: string; displayName?: string }[] = [{ email, displayName: name }];
 
@@ -31,47 +34,53 @@ export async function POST(request: Request) {
             });
         }
 
-        const event = {
-            summary: meetingTitle || `Meeting with ${name}`,
-            description: `Meeting scheduled via web app.\n\nNotes: ${notes || 'None'}`,
-            start: {
-                dateTime: start.toISOString(),
-            },
-            end: {
-                dateTime: end.toISOString(),
-            },
-            attendees,
-            guestsCanModify: true,
-            conferenceData: {
-                createRequest: {
-                    requestId: `meet-${Date.now()}`,
-                    conferenceSolutionKey: {
-                        type: 'hangoutsMeet',
+        let meetLink = '';
+        let eventLink = '';
+
+        if (!isPending) {
+            const event = {
+                summary: meetingTitle || `Meeting with ${name}`,
+                description: `Meeting scheduled via web app.\n\nNotes: ${notes || 'None'}`,
+                start: {
+                    dateTime: start.toISOString(),
+                },
+                end: {
+                    dateTime: end.toISOString(),
+                },
+                attendees,
+                guestsCanModify: true,
+                conferenceData: {
+                    createRequest: {
+                        requestId: `meet-${Date.now()}`,
+                        conferenceSolutionKey: {
+                            type: 'hangoutsMeet',
+                        },
                     },
                 },
-            },
-        };
+            };
 
-        const response = await calendar.events.insert({
-            calendarId,
-            conferenceDataVersion: 1,
-            sendUpdates: 'none', // DO NOT send Google Invites, we handle this via Aruba SMTP
-            requestBody: event,
-        });
+            const response = await calendar.events.insert({
+                calendarId,
+                conferenceDataVersion: 1,
+                sendUpdates: 'none', // DO NOT send Google Invites, we handle this via Aruba SMTP
+                requestBody: event,
+            });
+
+            meetLink = response.data.hangoutLink || '';
+            eventLink = response.data.htmlLink || '';
+        }
 
         // 2. Dispatch Custom Aruba SMTP Email
-        const recipientEmails: string[] = [email];
+        const adminEmail = process.env.GOOGLE_CALENDAR_ID || 'koba@baitsociety.ai';
+        const recipientEmails: string[] = [email, adminEmail]; // Always include admin
+        
         if (extraGuests && Array.isArray(extraGuests)) {
             extraGuests.forEach((guest: { email: string; name: string }) => {
                 if (guest.email) recipientEmails.push(guest.email);
             });
         }
 
-        // Extract the inherently generated Google Meet link from the Calendar API response
-        const meetLink = response.data.hangoutLink || '';
-
         // Use basic formatting since the API server handles UTC. 
-        // This is sent out as the generic booking time text.
         const formattedDate = format(start, 'EEEE, MMMM d, yyyy');
         const formattedTime = `${format(start, 'h:mm a')} - ${format(end, 'h:mm a')} UTC`;
 
@@ -82,13 +91,15 @@ export async function POST(request: Request) {
             dateString: formattedDate,
             timeString: formattedTime,
             meetLink: meetLink,
-            notes: notes
+            notes: notes,
+            isPending: isPending
         });
 
         return NextResponse.json({
             success: true,
+            status: isPending ? 'pending' : 'confirmed',
             meetLink: meetLink,
-            eventLink: response.data.htmlLink
+            eventLink: eventLink
         });
     } catch (error) {
         console.error('Error creating meeting:', error);

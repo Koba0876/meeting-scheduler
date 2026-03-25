@@ -18,6 +18,7 @@ export async function sendMeetingEmail({
     meetLink,
     notes,
     clientName,
+    isPending = false,
 }: {
     to: string | string[];
     meetingTitle: string;
@@ -26,11 +27,22 @@ export async function sendMeetingEmail({
     meetLink: string;
     notes?: string;
     clientName: string;
+    isPending?: boolean;
 }) {
     if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
         console.warn('SMTP credentials not configured. Skipping email send.');
         return false;
     }
+
+    const subject = isPending 
+        ? `Authorization Required: ${meetingTitle || 'New Booking'} Request`
+        : `Meeting Confirmation: ${meetingTitle || 'Bait Society'} on ${dateString}`;
+
+    const headerNote = isPending
+        ? `<div style="background-color: #fef7e0; border: 1px solid #feefc3; border-radius: 4px; padding: 12px; margin-bottom: 24px; color: #b05e00; font-size: 13px;">
+            <strong>Note:</strong> This is a last-minute booking request that requires manual authorization by the Bait Society team.
+           </div>`
+        : '';
 
     const guestListHtml = Array.isArray(to)
         ? to.map(email => `<li style="margin-bottom: 4px; display: flex; align-items: center;"><span style="color: #3c4043;">${email}</span></li>`).join('')
@@ -40,6 +52,7 @@ export async function sendMeetingEmail({
 
     const htmlContent = `
         <div style="font-family: 'Google Sans', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #3c4043;">
+            ${headerNote}
             <div style="border: 1px solid #dadce0; border-radius: 8px; overflow: hidden; margin-bottom: 24px;">
                 <div style="padding: 24px;">
                     <p style="font-size: 14px; color: #70757a; margin: 0 0 8px 0;">${dateString} ⋅ ${timeString}</p>
@@ -74,6 +87,13 @@ export async function sendMeetingEmail({
                         ` : ''}
                     </div>
 
+                    ${isPending ? `
+                    <div style="flex: 1; min-width: 250px;">
+                        <div style="font-size: 14px; color: #5f6368; font-style: italic; border: 1px dashed #dadce0; padding: 16px; border-radius: 8px;">
+                            Authorization pending. No Google Meet link generated yet.
+                        </div>
+                    </div>
+                    ` : `
                     <div style="flex: 1; min-width: 250px;">
                         <div style="margin-bottom: 16px;">
                             <a href="${meetLink}" style="display: inline-block; background-color: #1a73e8; color: #ffffff; padding: 10px 24px; border-radius: 4px; text-decoration: none; font-weight: 500; font-size: 14px; font-family: 'Google Sans', Roboto, Arial, sans-serif;">Join with Google Meet</a>
@@ -83,6 +103,7 @@ export async function sendMeetingEmail({
                             <a href="${meetLink}" style="color: #1a73e8; text-decoration: none;">${meetLink.replace('https://', '')}</a>
                         </div>
                     </div>
+                    `}
                 </div>
             </div>
         </div>
@@ -92,7 +113,7 @@ export async function sendMeetingEmail({
         const info = await transporter.sendMail({
             from: `"Bait Society" <${process.env.SMTP_USER}>`,
             to: Array.isArray(to) ? to.join(', ') : to,
-            subject: `Meeting Confirmation: ${meetingTitle || 'Bait Society'} on ${dateString}`,
+            subject: subject,
             html: htmlContent,
         });
         console.log('Message sent: %s', info.messageId);
