@@ -37,38 +37,36 @@ export async function POST(request: Request) {
         let meetLink = '';
         let eventLink = '';
 
-        if (!isPending) {
-            const event = {
-                summary: meetingTitle || `Meeting with ${name}`,
-                description: `Meeting scheduled via web app.\n\nNotes: ${notes || 'None'}`,
-                start: {
-                    dateTime: start.toISOString(),
-                },
-                end: {
-                    dateTime: end.toISOString(),
-                },
-                attendees,
-                guestsCanModify: true,
-                conferenceData: {
-                    createRequest: {
-                        requestId: `meet-${Date.now()}`,
-                        conferenceSolutionKey: {
-                            type: 'hangoutsMeet',
-                        },
+        const event = {
+            summary: isPending ? `[PENDING AUTHORIZATION] ${meetingTitle || `Meeting with ${name}`}` : (meetingTitle || `Meeting with ${name}`),
+            description: `Meeting scheduled via web app.\n\nNotes: ${notes || 'None'}`,
+            start: {
+                dateTime: start.toISOString(),
+            },
+            end: {
+                dateTime: end.toISOString(),
+            },
+            attendees,
+            guestsCanModify: true,
+            conferenceData: {
+                createRequest: {
+                    requestId: `meet-${Date.now()}`,
+                    conferenceSolutionKey: {
+                        type: 'hangoutsMeet',
                     },
                 },
-            };
+            },
+        };
 
-            const response = await calendar.events.insert({
-                calendarId,
-                conferenceDataVersion: 1,
-                sendUpdates: 'none', // DO NOT send Google Invites, we handle this via Aruba SMTP
-                requestBody: event,
-            });
+        const response = await calendar.events.insert({
+            calendarId,
+            conferenceDataVersion: 1,
+            sendUpdates: 'none', // DO NOT send Google Invites, we handle this via Aruba SMTP
+            requestBody: event,
+        });
 
-            meetLink = response.data.hangoutLink || '';
-            eventLink = response.data.htmlLink || '';
-        }
+        meetLink = response.data.hangoutLink || '';
+        eventLink = response.data.htmlLink || '';
 
         // 2. Dispatch Custom Aruba SMTP Email
         const adminEmail = process.env.GOOGLE_CALENDAR_ID || 'koba@baitsociety.ai';
