@@ -27,7 +27,6 @@ export async function POST(request: Request) {
         const attendees: { email: string; displayName?: string }[] = [
             { email, displayName: name },
             { email: 'melina@baitsociety.ai', displayName: 'Melina' },
-            { email: 'koba@baitsociety.ai', displayName: 'Koba' },
         ];
 
         if (extraGuests && Array.isArray(extraGuests)) {
@@ -73,7 +72,7 @@ export async function POST(request: Request) {
         eventLink = response.data.htmlLink || '';
 
         // 2. Dispatch Custom Aruba SMTP Email
-        const recipientEmails: string[] = [email, 'melina@baitsociety.ai', 'koba@baitsociety.ai'];
+        const recipientEmails: string[] = [email, 'melina@baitsociety.ai', 'koba@baitsociety.ai']; // koba@ also receives email but appears as organizer in template
         
         if (extraGuests && Array.isArray(extraGuests)) {
             extraGuests.forEach((guest: { email: string; name: string }) => {

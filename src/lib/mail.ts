@@ -44,11 +44,11 @@ export async function sendMeetingEmail({
            </div>`
         : '';
 
-    const guestListHtml = Array.isArray(to)
-        ? to.map(email => `<li style="margin-bottom: 4px; display: flex; align-items: center;"><span style="color: #3c4043;">${email}</span></li>`).join('')
-        : `<li style="margin-bottom: 4px; display: flex; align-items: center;"><span style="color: #3c4043;">${to}</span></li>`;
-
     const organizerEmail = 'koba@baitsociety.ai';
+
+    const guestListHtml = Array.isArray(to)
+        ? to.filter(email => email !== organizerEmail).map(email => `<li style="margin-bottom: 4px; display: flex; align-items: center;"><span style="color: #3c4043;">${email}</span></li>`).join('')
+        : (to !== organizerEmail ? `<li style="margin-bottom: 4px; display: flex; align-items: center;"><span style="color: #3c4043;">${to}</span></li>` : '');
 
     const htmlContent = `
         <div style="font-family: 'Google Sans', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #3c4043;">
