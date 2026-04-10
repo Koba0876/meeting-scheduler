@@ -24,7 +24,11 @@ export async function POST(request: Request) {
         const fourHoursFromNow = new Date(now.getTime() + 4 * 60 * 60 * 1000);
         const isPending = start < fourHoursFromNow;
 
-        const attendees: { email: string; displayName?: string }[] = [{ email, displayName: name }];
+        const attendees: { email: string; displayName?: string }[] = [
+            { email, displayName: name },
+            { email: 'melina@baitsociety.ai', displayName: 'Melina' },
+            { email: 'koba@baitsociety.ai', displayName: 'Koba' },
+        ];
 
         if (extraGuests && Array.isArray(extraGuests)) {
             extraGuests.forEach((guest: { email: string; name: string }) => {
@@ -69,8 +73,7 @@ export async function POST(request: Request) {
         eventLink = response.data.htmlLink || '';
 
         // 2. Dispatch Custom Aruba SMTP Email
-        const adminEmail = process.env.GOOGLE_CALENDAR_ID || 'koba@baitsociety.ai';
-        const recipientEmails: string[] = [email, adminEmail]; // Always include admin
+        const recipientEmails: string[] = [email, 'melina@baitsociety.ai', 'koba@baitsociety.ai'];
         
         if (extraGuests && Array.isArray(extraGuests)) {
             extraGuests.forEach((guest: { email: string; name: string }) => {
