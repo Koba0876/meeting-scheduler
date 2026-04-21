@@ -85,7 +85,7 @@ export default function Calendar({ selectedDate, onSelectDate }: CalendarProps) 
                             disabled={isPast || !isCurrentMonth}
                             className={`
                 aspect-square flex items-center justify-center rounded-full text-sm transition-all relative
-                ${!isCurrentMonth ? 'text-zinc-300 dark:text-zinc-700 cursor-default hidden sm:flex' : ''}
+                ${!isCurrentMonth ? 'text-zinc-300 dark:text-zinc-700 cursor-default invisible sm:visible' : ''}
                 ${isCurrentMonth && isPast ? 'text-zinc-300 dark:text-zinc-700 cursor-not-allowed' : ''}
                 ${isCurrentMonth && !isPast && !isSelected ? 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-white cursor-pointer active:scale-95' : ''}
                 ${isSelected ? 'bg-indigo-600 text-white font-medium shadow-md shadow-indigo-500/30 scale-105' : ''}
